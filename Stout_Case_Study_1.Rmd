@@ -1,0 +1,89 @@
+---
+title: "Stout_Case_Study_1"
+author: "Kyle Tumpey"
+date: "11/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Description of Dataset and Issues
+
+This dataset contains 10,000 instances of 55 variables related to loans made through the Lending Club platform and consists of both numeric and character data types. There are multiple issues with this dataset that create problems when analyzing. The first issue is with the first column of data, the employee title. This column has no consistency, with almost every row having a unique description listed, making it very difficult and time-consuming to use for analysis purposes. To fix this, a standardized list of employee titles should be created to allow for simple groupings and efficient analysis. Another issue with this dataset is the amount of columns that contain NAs or null values. At least 6 columns contain an NA value within the first 20 rows, making it very difficult to use these variables for any sort of comparative analyses. Lastly, there are multiple variables, such as current_accounts_delinq and num_accounts_120d_past_due, that almost entirely consist of 0s. These variables provide little value to the dataset and could be removed.
+
+
+## Visualizations
+
+Visualization #1
+This figure shows a histogram of the trimmed annual income of all individuals in the dataset. The trimmed annual income was used to eliminate outliers that, when included, greatly skewed the histogram. The median of the trimmed annual incomes is $63,000.
+
+```{r, echo=FALSE}
+loans <- read.csv("C:/Users/Kyle Tumpey/Documents/loans_full_schema.csv")
+trim <- function(x){
+  x[(x > mean(x)-1.5*IQR(x)) & (x < mean(x)+1.5*IQR(x))]
+}
+income <- trim(loans$annual_income)
+median(income)
+hist(income, main = "Trimmed Annual Income Histogram", xlab = "Annual Income", ylab = "Frequency", border="black", col="cadetblue")
+```
+
+Visualization #2
+This figure displays a bar chart of the average loan amount for each potential loan grade. There is a general positive relationship that exists between the two parameters. The overall average loan amount for the dataset is $16,361.92.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(dplyr)
+df <- data.frame(grade = loans$grade, loan_amt = loans$loan_amount)
+df <- df %>% group_by(grade) %>% summarise(me = mean(loan_amt))
+ggplot(aes(x = grade, y = me), data = df) + 
+  geom_bar(stat = "identity", color="gray",fill="light blue") + ggtitle("Average Loan Amount by Grade")   + labs(x="Grade",y="Avg Loan Amount ($)") + theme_gray()
+```
+
+Visualization #3
+This figure displays a boxplot of the distribution of monthly loan installments for each potential loan grade. There is a consistent increase in the mean monthly loan payment as the loan grade gets worse. Additionally, the monthly loan installments for grades A-D all follow very similar distributions.
+
+```{r, echo=FALSE}
+ggplot(loans, aes(x=grade,y=installment)) +
+  geom_boxplot() + ggtitle("Loan Grade vs Monthly Loan Payment") + 
+  labs(x="Grade",y="Monthly Installment") + theme_gray()
+```
+
+Visualization #4
+This figure displays a scatter plot of the percentage of an individual's credit lines that have never been delinquent vs the interest rate they received on their loan. There appears to be no obvious correlation between the two parameters based on this dataset.
+
+```{r, echo=FALSE}
+ggplot(loans, aes(x=account_never_delinq_percent, y=interest_rate)) +
+    geom_point(alpha=0.7, col="red") + 
+    ggtitle("Account Delinquency Rate vs Loan Interest Rate") +
+    labs(x="Account Never Delinquent Rate",y="Interest Rate")
+```
+
+Visualization #5
+This last figure displays a pie chart that shows the breakdown of the applicants' homeownership statuses. Nearly have the applicants in the dataset have a mortgage, roughly 40% are renters, and only about 15% own their home outright.
+
+```{r, echo=FALSE}
+homeown <- data.frame(home = loans$homeownership)
+homeown <- homeown %>%
+        group_by(home) %>%
+        tally()
+pie(homeown$n, labels = homeown$home, main="Applicant Homeownership Status", col= c("white","light blue","aquamarine"))
+```
+
+Model to Predict Interest Rate
+
+```{r, echo=FALSE, warning=FALSE}
+library(modelr)
+
+mod <- lm(interest_rate ~ loan_amount, data = loans)
+coef(mod)
+
+ggplot(loans, aes(loan_amount, interest_rate)) + 
+  geom_point(col = "blue") +
+  geom_abline(size = 1.5, intercept = mod$coefficients[1], slope = mod$coefficients[2])
+
+cor.test(loans$loan_amount, loans$interest_rate)
+```
+
+This model attempts to predict the interest rate an individual will receive on their loan based on the amount of the loan the applicant received. For this model, it was assumed that the relationship between the parameters was linear. The function used to fit the linear model calculated a line of best fit with a y-intercept of 1.19e+01 and a slope of 3.13e-05. The plot of the two parameters also revealed a correlation coefficient of 0.0645. If more time was available, I would have attempted to add additional variables to the model that might help increase the overall accuracy.
