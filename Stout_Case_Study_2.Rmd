@@ -1,0 +1,195 @@
+---
+title: "Stout_Case_Study_2"
+author: "Kyle Tumpey"
+date: "11/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 2015
+
+Total Revenue
+
+```{r, echo=FALSE}
+orders = read.csv("C:/Users/Kyle Tumpey/Documents/University of Miami/Junior/casestudy.csv")
+
+sum(subset(orders$net_revenue, orders$year == "2015"))
+```
+
+Total Customers Current Year
+
+```{r, echo=FALSE}
+x15 = t(subset(orders$customer_email, orders$year == "2015"))
+ncol(x15)
+```
+
+The other metrics described in the problem cannot be calculated for 2015, as they all require a prior year of data to compare to.
+
+## 2016
+
+Total Revenue
+
+```{r, echo=FALSE}
+sum(subset(orders$net_revenue, orders$year == "2016"))
+```
+
+Total Customers Current Year
+
+```{r, echo=FALSE}
+x16 = t(subset(orders$customer_email, orders$year == "2016"))
+ncol(x16)
+```
+
+Total Customers Previous Year
+
+```{r, echo=FALSE}
+ncol(x15)
+```
+
+New Customers
+
+```{r, echo=FALSE}
+new_cust_16 = sum(!(subset(orders$customer_email, orders$year == "2016") %in% subset(orders$customer_email, orders$year == "2015")))
+new_cust_16
+```
+
+Lost Customers 
+
+```{r, echo=FALSE}
+lost_cust_16 = sum(!(subset(orders$customer_email, orders$year == "2015") %in% subset(orders$customer_email, orders$year == "2016")))
+lost_cust_16
+```
+
+New Customer Revenue
+
+```{r, echo=FALSE, warning=FALSE}
+new_cust_rev_16 = sum(subset(orders$net_revenue, orders$year == "2016" & !(subset(orders$customer_email, orders$year == "2016") %in% subset(orders$customer_email, orders$year == "2015"))))
+new_cust_rev_16
+```
+
+Revenue Lost from Attrition
+
+```{r, echo=FALSE, warning=FALSE}
+lost_cust_rev_16 = sum(subset(orders$net_revenue, orders$year == "2015" & (!subset(orders$customer_email, orders$year == "2015") %in% subset(orders$customer_email, orders$year == "2016"))))
+
+lost_cust_rev_16 - new_cust_rev_16
+```
+
+Existing Customer Revenue Current Year
+
+```{r, echo=FALSE, warning=FALSE}
+ex_cust_rev_16 = sum(subset(orders$net_revenue, orders$year == "2016" & (subset(orders$customer_email, orders$year == "2016") %in% subset(orders$customer_email, orders$year == "2015"))))
+ex_cust_rev_16
+```
+
+Existing Customer Revenue Prior Year
+
+```{r, echo=FALSE, warning=FALSE}
+ex_cust_rev_prior_16 = sum(subset(orders$net_revenue, orders$year == "2015" & (subset(orders$customer_email, orders$year == "2016") %in% subset(orders$customer_email, orders$year == "2015"))))
+ex_cust_rev_prior_16
+```
+
+Existing Customer Growth
+
+```{r, echo=FALSE}
+ex_cust_growth_16 = ex_cust_rev_16 - ex_cust_rev_prior_16
+ex_cust_growth_16
+```
+
+## 2017
+
+Total Revenue
+
+```{r, echo=FALSE}
+sum(subset(orders$net_revenue, orders$year == "2017"))
+```
+
+Total Customers Current Year
+
+```{r, echo=FALSE}
+x17 = t(subset(orders$customer_email, orders$year == "2017"))
+ncol(x17)
+```
+
+Total Customers Previous Year
+
+```{r, echo=FALSE}
+ncol(x16)
+```
+
+New Customers
+
+```{r, echo=FALSE}
+new_cust_17 = sum(!(subset(orders$customer_email, orders$year == "2017") %in% subset(orders$customer_email, orders$year == "2016")))
+new_cust_17
+```
+
+Lost Customers 
+
+```{r, echo=FALSE}
+lost_cust_17 = sum(!(subset(orders$customer_email, orders$year == "2016") %in% subset(orders$customer_email, orders$year == "2017")))
+lost_cust_17
+```
+
+New Customer Revenue
+
+```{r, echo=FALSE, warning=FALSE}
+new_cust_rev_17 = sum(subset(orders$net_revenue, orders$year == "2017" & !(subset(orders$customer_email, orders$year == "2017") %in% subset(orders$customer_email, orders$year == "2016"))))
+new_cust_rev_17
+```
+
+Revenue Lost from Attrition
+
+```{r, echo=FALSE, warning=FALSE}
+lost_cust_rev_17 = sum(subset(orders$net_revenue, orders$year == "2016" & (!subset(orders$customer_email, orders$year == "2016") %in% subset(orders$customer_email, orders$year == "2017"))))
+
+lost_cust_rev_17 - new_cust_rev_17
+```
+
+Existing Customer Revenue Current Year
+
+```{r, echo=FALSE, warning=FALSE}
+ex_cust_rev_17 = sum(subset(orders$net_revenue, orders$year == "2017" & (subset(orders$customer_email, orders$year == "2017") %in% subset(orders$customer_email, orders$year == "2016"))))
+ex_cust_rev_17
+```
+
+Existing Customer Revenue Prior Year
+
+```{r, echo=FALSE, warning=FALSE}
+ex_cust_rev_prior_17 = sum(subset(orders$net_revenue, orders$year == "2016" & (subset(orders$customer_email, orders$year == "2017") %in% subset(orders$customer_email, orders$year == "2016"))))
+ex_cust_rev_prior_17
+```
+
+Existing Customer Growth
+
+```{r, echo=FALSE}
+ex_cust_growth_17 = ex_cust_rev_17 - ex_cust_rev_prior_17
+ex_cust_growth_17
+```
+
+## Plots
+
+Figure #1
+This figure displays a boxplot of the net revenue distribution for each of the three years in the dataset. All three years follow very similar net revenue distribution patterns, each having a mean around $125.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+ggplot(orders, aes(x=factor(year),y=net_revenue)) +
+  geom_boxplot() + ggtitle("Net Revenue Distribution by Year") + 
+  labs(x="Year",y="Net Revenue") + theme_gray()
+```
+
+Figure #2
+This figure highlights the differences in total net revenue across the three years in the dataset. The most lucrative year was 2017, while the least lucrative was 2016. The pattern shown in this barplot is consistent with the existing customer growth from 2015-2016 (-958,812) vs 2016-2017 (262249).
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+revenue <- data.frame(year = orders$year, net_rev = orders$net_revenue)
+revenue <- revenue %>% group_by(year) %>% summarise(sum = sum(net_rev))
+ggplot(aes(x = year, y = sum), data = revenue) + 
+  geom_bar(stat = "identity", color="gray",fill="light blue") + ggtitle("Total Net Revenue by Year")   + labs(x="Year",y="Total Net Revenue ($)") + theme_gray()
+```
+
